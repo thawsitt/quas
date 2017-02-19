@@ -19,6 +19,7 @@ const
   request = require('request'),
   quasData = require('./data/quas-data.js');
 
+var Promise = require('promise');
 var app = express();
 app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
@@ -473,7 +474,7 @@ function sendTextMessage(recipientId, messageText) {
     }
   };
 
-  callSendAPI(messageData);
+  return callSendAPI(messageData);
 }
 
 /*
@@ -747,29 +748,33 @@ function sendAccountLinking(recipientId) {
  *
  */
 function callSendAPI(messageData) {
-  request({
-    uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
-    method: 'POST',
-    json: messageData
-
-  }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
-
-      if (messageId) {
-        console.log("Successfully sent message with id %s to recipient %s", 
-          messageId, recipientId);
-      } else {
-      console.log("Successfully called Send API for recipient %s", 
-        recipientId);
-      }
-    } else {
-      console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
-    }
-  });  
+    return new Promise(function (resolve, reject) { // ***
+        request({
+            uri: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: { access_token: PAGE_ACCESS_TOKEN },
+            method: 'POST',
+            json: messageData
+        }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                var recipientId = body.recipient_id;
+                var messageId = body.message_id;
+                if (messageId) {
+                    console.log("Successfully sent message with id %s to recipient %s", 
+                                messageId, recipientId);
+                } else {
+                    console.log("Successfully called Send API for recipient %s", 
+                                recipientId);
+                }
+                resolve(body); // ***
+            } else {
+                console.error("Failed calling Send API", response.statusCode,
+                              response.statusMessage, body.error);
+                reject(body.error); // ***
+            }
+        });
+    });
 }
+
 
 /*********************************************************************
  * My Functions
@@ -850,6 +855,17 @@ function replyTextMessage(senderID, messageText) {
           break;
 
         /* my cases */
+        case 'sync': // Send messages in order using Promise
+          sendTextMessage(senderID, "1")
+          .then(sendTextMessage.bind(null, senderID, "2")) // *** pass a function reference
+          .then(sendTextMessage.bind(null, senderID, "3"))
+          .then(sendTextMessage.bind(null, senderID, "4"))
+          .then(sendTextMessage.bind(null, senderID, "5"))
+
+          .catch(function (body) {
+            _log('Sync test FAILED. Aborted');
+          });
+          break;
 
         default:
           sendTextMessage(senderID, messageText);
