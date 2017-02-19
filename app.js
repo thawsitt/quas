@@ -16,7 +16,8 @@ const
   crypto = require('crypto'),
   express = require('express'),
   https = require('https'),  
-  request = require('request');
+  request = require('request'),
+  quasData = require('./quas-data.js');
 
 var app = express();
 app.set('port', process.env.PORT || 5000);
@@ -250,67 +251,10 @@ function receivedMessage(event) {
   }
 
   if (messageText) {
+    replyTextMessage(senderID, messageText);
+  } 
 
-    // If we receive a text message, check to see if it matches any special
-    // keywords and send back the corresponding example. Otherwise, just echo
-    // the text we received.
-    switch (messageText) {
-      case 'image':
-        sendImageMessage(senderID);
-        break;
-
-      case 'gif':
-        sendGifMessage(senderID);
-        break;
-
-      case 'audio':
-        sendAudioMessage(senderID);
-        break;
-
-      case 'video':
-        sendVideoMessage(senderID);
-        break;
-
-      case 'file':
-        sendFileMessage(senderID);
-        break;
-
-      case 'button':
-        sendButtonMessage(senderID);
-        break;
-
-      case 'generic':
-        sendGenericMessage(senderID);
-        break;
-
-      case 'receipt':
-        sendReceiptMessage(senderID);
-        break;
-
-      case 'quick reply':
-        sendQuickReply(senderID);
-        break;        
-
-      case 'read receipt':
-        sendReadReceipt(senderID);
-        break;        
-
-      case 'typing on':
-        sendTypingOn(senderID);
-        break;        
-
-      case 'typing off':
-        sendTypingOff(senderID);
-        break;        
-
-      case 'account linking':
-        sendAccountLinking(senderID);
-        break;
-
-      default:
-        sendTextMessage(senderID, messageText);
-    }
-  } else if (messageAttachments) {
+  else if (messageAttachments) {
     sendTextMessage(senderID, "Message with attachment received");
   }
 }
@@ -827,10 +771,150 @@ function callSendAPI(messageData) {
   });  
 }
 
+/*********************************************************************
+ * My Functions
+ *********************************************************************/
+
+/**
+ * Function: replyTextMessage
+ * --------------------------
+ * This function is called when a user sends a text message.
+ * Checks the message and responds accordingly.
+ * 
+ * @param  {string} senderID    [Unique ID of the user]
+ * @param  {string} messageText [Message sent by the user]
+ */
+function replyTextMessage(senderID, messageText) {
+
+    // Checking if a user sent a greeting text (as defined in quas-data.js)
+    // If that is the case, replies "Hi " + <user's firstname>
+    if (quasData["hi"].indexOf(messageText.toLowerCase()) != -1) {
+      greetUser(senderID);
+    } 
+
+    else {
+      // If we receive a text message, check to see if it matches any special
+      // keywords and send back the corresponding example. Otherwise, just echo
+      // the text we received.
+      switch (messageText) {
+        case 'image':
+          sendImageMessage(senderID);
+          break;
+
+        case 'gif':
+          sendGifMessage(senderID);
+          break;
+
+        case 'audio':
+          sendAudioMessage(senderID);
+          break;
+
+        case 'video':
+          sendVideoMessage(senderID);
+          break;
+
+        case 'file':
+          sendFileMessage(senderID);
+          break;
+
+        case 'button':
+          sendButtonMessage(senderID);
+          break;
+
+        case 'generic':
+          sendGenericMessage(senderID);
+          break;
+
+        case 'receipt':
+          sendReceiptMessage(senderID);
+          break;
+
+        case 'quick reply':
+          sendQuickReply(senderID);
+          break;        
+
+        case 'read receipt':
+          sendReadReceipt(senderID);
+          break;        
+
+        case 'typing on':
+          sendTypingOn(senderID);
+          break;        
+
+        case 'typing off':
+          sendTypingOff(senderID);
+          break;        
+
+        case 'account linking':
+          sendAccountLinking(senderID);
+          break;
+
+        /* my cases */
+        case 'info':
+          getUserInfo(senderID, function(info) {
+            if (info) {
+              console.log('---success');
+            } else {
+              console.log('---fail');
+            }
+          });
+          break; 
+
+        default:
+          sendTextMessage(senderID, messageText);
+      }
+    }  
+}
+
+
+/**
+ * Function: greetUser
+ * ---------------------
+ * Replies "Hi " + <user's first name> + "!"
+ * If user info request fails, just replies "Hello!".
+ */
+function greetUser(userID) {
+  _log('Getting user information.');
+  request({
+    uri: 'https://graph.facebook.com/v2.6/' + userID,
+    qs: { 
+      access_token: PAGE_ACCESS_TOKEN,
+      fields: "first_name" //, last_name, gender, locale, timezone" 
+    },
+    method: 'GET',
+
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var user = JSON.parse(body);
+      console.log("Get user info SUCCESS!");
+      sendTextMessage(userID, "Hi " + user.first_name + "!");
+     } else {
+      _log('Getting user info FAILED.');
+      sendTextMessage(userID, "Hello!");
+      console.error("Failed calling GET request for user info: ", response.statusCode, response.statusMessage, body.error);
+    }
+  });
+}
+
+
+/**
+ * (helper) Function: _log
+ * ------------------------
+ * Makes an important message (log) easier to read
+ * in the console.
+ */
+function _log(msg) {
+  console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
+  console.log(msg);
+  console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=');
+}
+
+
 // Start server
 // Webhooks must be available via SSL with a certificate signed by a valid 
 // certificate authority.
 app.listen(app.get('port'), function() {
+  console.log(quasData.hi);
   console.log('Node app is running on port', app.get('port'));
 });
 
