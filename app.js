@@ -17,7 +17,7 @@ const
   express = require('express'),
   https = require('https'),  
   request = require('request'),
-  quasData = require('./quas-data.js');
+  quasData = require('./data/quas-data.js');
 
 var app = express();
 app.set('port', process.env.PORT || 5000);
