@@ -1,5 +1,3 @@
-# Quas
-
 ![quas_logo](https://github.com/thawsitt/quas/blob/master/data/quas_logo.png)
 
 - **what**: a chat bot for Facebook Messenger
