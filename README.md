@@ -1,5 +1,7 @@
 # Quas
 
+![quas_logo](https://github.com/thawsitt/quas/blob/master/data/quas_logo.png)
+
 - **what**: a chat bot for Facebook Messenger
 - **why** : because the world needs more to-do lists
 - **how** : [Node.js](https://nodejs.org/en/), 
