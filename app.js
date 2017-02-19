@@ -850,15 +850,6 @@ function replyTextMessage(senderID, messageText) {
           break;
 
         /* my cases */
-        case 'info':
-          getUserInfo(senderID, function(info) {
-            if (info) {
-              console.log('---success');
-            } else {
-              console.log('---fail');
-            }
-          });
-          break; 
 
         default:
           sendTextMessage(senderID, messageText);
@@ -882,7 +873,6 @@ function greetUser(userID) {
       fields: "first_name" //, last_name, gender, locale, timezone" 
     },
     method: 'GET',
-
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       var user = JSON.parse(body);
@@ -914,7 +904,6 @@ function _log(msg) {
 // Webhooks must be available via SSL with a certificate signed by a valid 
 // certificate authority.
 app.listen(app.get('port'), function() {
-  console.log(quasData.hi);
   console.log('Node app is running on port', app.get('port'));
 });
 
