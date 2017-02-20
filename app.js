@@ -776,9 +776,71 @@ function callSendAPI(messageData) {
 }
 
 
-/*********************************************************************
- * My Functions
- *********************************************************************/
+/*
+ ===========================================================
+                         MY FUNCTIONS
+ ===========================================================
+ */
+
+/**
+ * Function: showGreetingText
+ * --------------------------
+ * Sets the greeting text which is shown to new users. 
+ *
+ * Note: If you want to test this, delete the message 
+ * history and you should see the greeting text.
+ */
+function showGreetingText() {
+  request({
+    uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { 
+      access_token: PAGE_ACCESS_TOKEN,
+    },
+    method: 'POST',
+    json: {
+      setting_type: "greeting",
+      greeting: {
+        // Greeting text shown to the user
+        text: "Hi {{user_first_name}}. Welcome to Quas!"
+      }
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      _log("Success: Greeting text set.");
+     } else {
+      _log('Setting greeting text FAILED.');
+      console.error("Error in setting greeting text: ", response.statusCode, response.statusMessage, body.error);
+    }
+  });
+}
+
+/**
+ * Function: removeGreetingText
+ * ----------------------------
+ * Removes the greeting text which is shown to new users.
+ *
+ * Note: This functions is currently not called anywhere. 
+ * It is only here for completeness.
+ */
+function removeGreetingText() {
+  request({
+    uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { 
+      access_token: PAGE_ACCESS_TOKEN,
+    },
+    method: 'DELETE',
+    json: {
+      setting_type: "greeting"
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      _log("Greeting text removed.")
+     } else {
+      _log('Setting greeting text FAILED.');
+      console.error("Error in removing greeting text: ", response.statusCode, response.statusMessage, body.error);
+    }
+  });
+}
 
 /**
  * Function: replyTextMessage
@@ -921,6 +983,7 @@ function _log(msg) {
 // certificate authority.
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
+  showGreetingText();
 });
 
 module.exports = app;
