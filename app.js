@@ -19,6 +19,8 @@ const
   request = require('request'),
   quasData = require('./data/quas-data.js');
 
+const kGetStartedButton = 'GET_STARTED';
+
 var Promise = require('promise');
 var app = express();
 app.set('port', process.env.PORT || 5000);
@@ -306,9 +308,8 @@ function receivedPostback(event) {
   console.log("Received postback for user %d and page %d with payload '%s' " + 
     "at %d", senderID, recipientID, payload, timeOfPostback);
 
-  // When a postback is called, we'll send a message back to the sender to 
-  // let them know it was successful
-  sendTextMessage(senderID, "Postback called");
+  // When a postback is called, we'll check the payload and handle accordingly
+  handlePayload(senderID, payload);
 }
 
 /*
@@ -787,8 +788,8 @@ function callSendAPI(messageData) {
  * --------------------------
  * Sets the greeting text which is shown to new users. 
  *
- * Note: If you want to test this, delete the message 
- * history and you should see the greeting text.
+ * Note: If you want to test this, delete the messages
+ * and go to the app page again (https://m.me/quas.chat).
  */
 function showGreetingText() {
   request({
@@ -840,6 +841,88 @@ function removeGreetingText() {
       console.error("Error in removing greeting text: ", response.statusCode, response.statusMessage, body.error);
     }
   });
+}
+
+/**
+ * Function: showGetStartedButton
+ * ------------------------------
+ * Initializes "Get Started" button which is shown to new users. 
+ *
+ * Note: If you want to test this, delete the messages 
+ * and go to the app page again (https://m.me/quas.chat).
+ */
+function showGetStartedButton() {
+  request({
+    uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { 
+      access_token: PAGE_ACCESS_TOKEN,
+    },
+    method: 'POST',
+    json: {
+      setting_type: "call_to_actions",
+      thread_state: "new_thread",
+      call_to_actions: [
+        {
+          "payload": kGetStartedButton
+        }
+      ]
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      _log("Success: GET STARTED BUTTON set.");
+     } else {
+      _log('Cannot set GET STARTED BUTTON');
+      console.error("Error in setting Get Started button: ", response.statusCode, response.statusMessage, body.error);
+    }
+  });
+}
+
+/**
+ * Function: removeGetStartedButton
+ * --------------------------------
+ * Removes the "Get Started" button which is shown to new users.
+ *
+ * Note: This functions is currently not called anywhere. 
+ * It is only here for completeness.
+ */
+function removeGetStartedButton() {
+  request({
+    uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { 
+      access_token: PAGE_ACCESS_TOKEN,
+    },
+    method: 'DELETE',
+    json: {
+      setting_type: "call_to_actions",
+      thread_state: "new_thread"
+    }
+  }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      _log("Success: GET STARTED BUTTON removed.");
+     } else {
+      _log('Cannot remove GET STARTED BUTTON');
+      console.error("Error in removing Get Started button: ", response.statusCode, response.statusMessage, body.error);
+    }
+  });
+}
+
+/**
+ * Function: handlePayload
+ * -----------------------
+ * This function is called when a user sent a message with payload. 
+ * (e.g: user pressed a button.) 
+ * 
+ * This function calls appropriate fuction based on the payload.
+ */
+function handlePayload(senderID, payload) {
+  if (payload == kGetStartedButton) {
+    var msg = "Get Started Button pressed."
+    sendTextMessage(senderID, msg);
+  } 
+
+  else {
+    sendTextMessage(senderID, "Payload received.");
+  }
 }
 
 /**
@@ -984,6 +1067,7 @@ function _log(msg) {
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
   showGreetingText();
+  showGetStartedButton();
 });
 
 module.exports = app;
