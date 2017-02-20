@@ -1026,24 +1026,48 @@ function replyTextMessage(senderID, messageText) {
  * If user info request fails, just replies "Hello!".
  */
 function greetUser(userID) {
-  _log('Getting user information.');
-  request({
-    uri: 'https://graph.facebook.com/v2.6/' + userID,
-    qs: { 
-      access_token: PAGE_ACCESS_TOKEN,
-      fields: "first_name" //, last_name, gender, locale, timezone" 
+  getUserInfo(userID)
+  .then((body) => {
+    var user_first_name = JSON.parse(body).first_name;
+    if (user_first_name) {
+      sendTextMessage(userID, "Hi " + user_first_name + "!"); 
+    } else {
+      sendTextMessage(userID, "Hello!");
+    }
+  })
+  .catch((err) => {
+    sendTextMessage(userID, "Hello!");
+    console.error("Cannot get user information: ", err);
+  });
+}
+
+
+/**
+ * Function: GET USER INFO
+ * -----------------------
+ * Promise compatible function which returns a JSON representation
+ * of user information (first name, last name, gender, locale, timezone) on success.
+ */
+function getUserInfo(senderID) {
+  return new Promise(function (resolve, reject) { // ***
+    request({
+      uri: 'https://graph.facebook.com/v2.6/' + senderID,
+      qs: { 
+        access_token: PAGE_ACCESS_TOKEN,
     },
     method: 'GET',
   }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      var user = JSON.parse(body);
-      console.log("Get user info SUCCESS!");
-      sendTextMessage(userID, "Hi " + user.first_name + "!");
-     } else {
-      _log('Getting user info FAILED.');
-      sendTextMessage(userID, "Hello!");
-      console.error("Failed calling GET request for user info: ", response.statusCode, response.statusMessage, body.error);
-    }
+      _log("Get User Info SUCCESS.");
+      // console.log(body); // left for debugging
+      resolve(body); // *** user info JSON
+      } else {
+        _log("Get User Info FAILED.");
+        console.error("Failed calling Send API", response.statusCode,
+          response.statusMessage, body.error);
+        reject(body.error); // ***
+      }
+    });
   });
 }
 
