@@ -916,13 +916,38 @@ function removeGetStartedButton() {
  */
 function handlePayload(senderID, payload) {
   if (payload == kGetStartedButton) {
-    var msg = "Get Started Button pressed."
-    sendTextMessage(senderID, msg);
+    showIntro(senderID);
   } 
 
   else {
     sendTextMessage(senderID, "Payload received.");
   }
+}
+
+/**
+ * Function: showIntro
+ * -------------------
+ * Explains the user about Quas and its functions.
+ *
+ * This message is shown to new users when they press
+ * 'Get Started' button, or to existing users when
+ * they type 'info'.
+ */
+function showIntro(senderID) {
+  var intro = quasData.intro_msg;
+  getUserInfo(senderID)
+  .then((body) => {
+    var user_first_name = JSON.parse(body).first_name;
+    if (user_first_name) {
+      sendTextMessage(senderID, "Hi " + user_first_name + ". " + intro);
+    } else {
+      sendTextMessage(senderID, intro);
+    }
+  })
+  .catch((err) => {
+    sendTextMessage(senderID, intro);
+    console.error("Cannot get user information: ", err);
+  });
 }
 
 /**
@@ -946,7 +971,7 @@ function replyTextMessage(senderID, messageText) {
       // If we receive a text message, check to see if it matches any special
       // keywords and send back the corresponding example. Otherwise, just echo
       // the text we received.
-      switch (messageText) {
+      switch (messageText.toLowerCase()) {
         case 'image':
           sendImageMessage(senderID);
           break;
@@ -1000,6 +1025,11 @@ function replyTextMessage(senderID, messageText) {
           break;
 
         /* my cases */
+
+        case 'info':
+          showIntro(senderID);
+          break;
+
         case 'sync': // Send messages in order using Promise
           sendTextMessage(senderID, "1")
           .then(sendTextMessage.bind(null, senderID, "2")) // *** pass a function reference
