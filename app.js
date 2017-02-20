@@ -20,6 +20,9 @@ const
   quasData = require('./data/quas-data.js');
 
 const kGetStartedButton = 'GET_STARTED';
+const kHelp = 'HELP';
+const kTasks = 'TASKS';
+const kJoke = 'JOKE';
 
 var Promise = require('promise');
 var app = express();
@@ -776,10 +779,11 @@ function callSendAPI(messageData) {
     });
 }
 
+/* --- This marks the beginning of Thawsitt's code. --- */
 
 /*
  ===========================================================
-                         MY FUNCTIONS
+                         USER INTERFACE
  ===========================================================
  */
 
@@ -791,7 +795,7 @@ function callSendAPI(messageData) {
  * Note: If you want to test this, delete the messages
  * and go to the app page again (https://m.me/quas.chat).
  */
-function showGreetingText() {
+function addGreetingText() {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
     qs: { 
@@ -851,7 +855,7 @@ function removeGreetingText() {
  * Note: If you want to test this, delete the messages 
  * and go to the app page again (https://m.me/quas.chat).
  */
-function showGetStartedButton() {
+function addGetStartedButton() {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
     qs: { 
@@ -905,6 +909,76 @@ function removeGetStartedButton() {
     }
   });
 }
+
+
+function addPersistentMenu(){
+  request({
+    url: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { access_token: PAGE_ACCESS_TOKEN },
+    method: 'POST',
+    json:{
+      setting_type : "call_to_actions",
+      thread_state : "existing_thread",
+      call_to_actions:[
+      {
+        type:"postback",
+        title:"Help",
+        payload: kHelp
+      },
+      {
+        type:"postback",
+        title:"My Tasks",
+        payload: kTasks
+      },
+      {
+        type:"postback",
+        title:"Tell me a Joke",
+        payload: kJoke
+      },
+      {
+        type:"web_url",
+        title:"Visit app page",
+        url:"https://quas.herokuapp.com/"
+      }
+      ]
+    }
+  }, function(error, response, body) {
+    //console.log(response)
+    if (error) {
+      console.log('Error adding persistent menu: ', error)
+    } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+    } else {
+      _log("Added Persistent Menu.");
+    }
+  });
+}
+
+function removePersistentMenu(){
+  request({
+    url: 'https://graph.facebook.com/v2.6/me/thread_settings',
+    qs: { access_token: PAGE_ACCESS_TOKEN },
+    method: 'DELETE',
+    json:{
+      setting_type : "call_to_actions",
+      thread_state : "existing_thread",
+    }
+  }, function(error, response, body) {
+  //console.log(response)
+    if (error) {
+      console.log('Error sending messages: ', error)
+    } else if (response.body.error) {
+      console.log('Error: ', response.body.error)
+    }
+  });
+}
+
+
+/*
+ ===========================================================
+                     BOT FUNCTIONALITIES
+ ===========================================================
+ */
 
 /**
  * Function: handlePayload
@@ -1120,8 +1194,9 @@ function _log(msg) {
 // certificate authority.
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
-  showGreetingText();
-  showGetStartedButton();
+  addGreetingText();
+  addGetStartedButton();
+  addPersistentMenu();
 });
 
 module.exports = app;
