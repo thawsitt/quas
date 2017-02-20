@@ -7,3 +7,5 @@
 <br>
 
 <a href="https://m.me/quas.chat" target="_blank"><img src="https://github.com/thawsitt/quas/blob/master/data/quas%20header.png"></a>
+
+*Quas is still in development. :bug: Please refer to [release history](https://github.com/thawsitt/quas/releases) for feature updates. To contribute, fork this repo and make a pull request. Thanks for stopping by. :sparkles:*
