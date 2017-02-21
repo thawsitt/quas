@@ -2,10 +2,8 @@
 
 <br>
 - **what**: a chat bot for Facebook Messenger
-- **why** : because the world needs more to-do lists
-- **how** : [Node.js](https://nodejs.org/en/), [mongoDB](https://www.mongodb.com/), [Heroku](https://www.heroku.com/home), [FbMessenger](https://developers.facebook.com/docs/messenger-platform)
+-  **why**: because the world needs more to-do lists
+-  **how**: [Node.js](https://nodejs.org/en/), [mongoDB](https://www.mongodb.com/), [Heroku](https://www.heroku.com/home), [FbMessenger](https://developers.facebook.com/docs/messenger-platform)
 <br>
 
-<a href="https://m.me/quas.chat" target="_blank"><img src="https://github.com/thawsitt/quas/blob/master/data/quas%20header.png"></a>
-
-*Quas is still in development. :bug: Please refer to [release history](https://github.com/thawsitt/quas/releases) for feature updates. To contribute, fork this repo and make a pull request. Thanks for stopping by. :sparkles:*
+> *Quas is still in development. :bug: Please refer to [release history](https://github.com/thawsitt/quas/releases) for feature updates. To contribute, fork this repo and make a pull request. Thanks for stopping by. :sparkles:*
