@@ -1,4 +1,4 @@
-<a href="https://m.me/quas.chat" target="_blank"><img src="http://i.imgur.com/HuKhBsH.png"></a>
+<a href="https://m.me/quas.chat" target="_blank"><img src="http://i.imgur.com/o85ADOi.png"></a>
 
 <br>
 - **what**: a chat bot for Facebook Messenger
